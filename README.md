@@ -6,7 +6,7 @@ A fully decentralized "no-loss" (English style) auction built on the Stellar net
 
 - **Network:** Stellar Testnet
 - **Contract ID:** `CC6LMQUT6NPX7KYLPPLMKTROZZZ7VZPCAXQZQU4A3OVRGWTN77UJGE4H`
-- **Frontend Live Demo:** `[YOUR_VERCEL_LINK_HERE]`
+- **Frontend Live Demo:** [https://assessment-week4.vercel.app](https://assessment-week4.vercel.app)
 
 ## Prerequisites
 
