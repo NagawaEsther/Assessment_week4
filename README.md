@@ -1,43 +1,45 @@
-# Decentralized No-Loss Auction on Stellar Soroban
+# Decentralized No-Loss Auction on Stellar
 
-A fully decentralized "no-loss" (English style) auction built on the Stellar network using Soroban Smart Contracts. Outbid participants get their SEP-41 tokens automatically refunded in the same transaction.
+This is my submission for the No-Loss Auction Protocol project, built on the Stellar network using Soroban. In this auction system, outbid participants get their tokens automatically refunded back to them as soon as a higher bid is placed.
 
-## Links
+## Live Links
 
-- **Network:** Stellar Testnet
-- **Contract ID:** `CC6LMQUT6NPX7KYLPPLMKTROZZZ7VZPCAXQZQU4A3OVRGWTN77UJGE4H`
-- **Frontend Live Demo:** [https://assessment-week4.vercel.app](https://assessment-week4.vercel.app)
+- **Frontend Demo:** [https://assessment-week4.vercel.app](https://assessment-week4.vercel.app)
+- **Stellar Network:** Testnet
+- **Smart Contract ID:** `CC6LMQUT6NPX7KYLPPLMKTROZZZ7VZPCAXQZQU4A3OVRGWTN77UJGE4H`
 
-## Prerequisites
+## What you need to test it
 
-- Node.js v18+
-- [Freighter Wallet](https://freighter.app/) extension (set to **Testnet**)
-- Testnet XLM to fund transactions and place bids
+- Node.js installed
+- The [Freighter Wallet](https://freighter.app/) extension (make sure it's set to Testnet)
+- Some Testnet XLM to pay for transaction fees
 
-## Local Development (Frontend)
+## Running the Frontend Locally
 
-1. Navigate to the `frontend` directory:
+If you want to run the React app locally instead of using the Vercel link:
+
+1. Go into the frontend folder:
    ```bash
    cd frontend
    ```
-2. Install dependencies:
+2. Install the packages:
    ```bash
    npm install
    ```
-3. Run the development server:
+3. Start the app:
    ```bash
    npm run dev
    ```
 
-## Contract Features
+## Core Contract Features
 
-1. **Initialize:** Create an auction with a designated SEP-41 token, starting price, and deadline.
-2. **Bid:** Place bids using the SEP-41 token. The previous highest bidder is automatically refunded within the same transaction.
-3. **Finalize:** Once the deadline has passed, anyone can finalize the auction to transfer the winning bid funds to the auctioneer.
-4. **Cancel:** The auctioneer can cancel the auction only if no bids have been placed yet.
+- **Initialize:** Start a new auction by setting the token, starting price, and how long the auction will last.
+- **Bid:** Users can place bids using a SEP-41 token. The contract automatically refunds the previous highest bidder so they don't lose their funds.
+- **Finalize:** Once the time is up, anyone can trigger this to send the winning funds to the auctioneer.
+- **Cancel:** The auctioneer can cancel the auction, but only if nobody has placed a bid yet.
 
-## Architecture & Tech Stack
+## Tech Stack
 
-- **Smart Contract:** Rust (Soroban SDK)
-- **Frontend UI:** React + TypeScript (Vite), Tailwind CSS
-- **Stellar Integration:** `@stellar/stellar-sdk`, `@stellar/freighter-api`
+- **Smart Contract:** Rust (Soroban)
+- **Frontend:** React, Vite, Tailwind CSS
+- **Wallet Connection:** `@stellar/freighter-api` and `@stellar/stellar-sdk`
