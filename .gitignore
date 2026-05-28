@@ -1,0 +1,20 @@
+# Root folder ignores
+.DS_Store
+*.log
+.env
+.env.local
+
+# Do not commit downloaded binaries
+stellar.exe
+stellar-cli.tar.gz
+
+# Frontend ignores
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+
+# Smart Contract / Rust ignores
+contracts/auction/target/
+contracts/auction/**/*.rs.bk
+contracts/auction/Cargo.lock
