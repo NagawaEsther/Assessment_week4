@@ -1,18 +1,18 @@
-# Decentralized No-Loss Auction Protocol on Stellar Soroban
+# Decentralized No-Loss Auction on Stellar Soroban
 
-A fully decentralized "no-loss" (English style) auction built on the Stellar network using Soroban Smart Contracts. Features automatic refunds of outbid participants' SEP-41 tokens and a stunning glassmorphism React frontend.
+A fully decentralized "no-loss" (English style) auction built on the Stellar network using Soroban Smart Contracts. Outbid participants get their SEP-41 tokens automatically refunded in the same transaction.
 
-## Deployment Details
+## Links
 
 - **Network:** Stellar Testnet
-- **Smart Contract ID:** `CC6LMQUT6NPX7KYLPPLMKTROZZZ7VZPCAXQZQU4A3OVRGWTN77UJGE4H`
-- **Frontend Live Link:** `https://stellar-no-loss-auction-demo.vercel.app` (placeholder, or local deploy instructions below)
+- **Contract ID:** `CC6LMQUT6NPX7KYLPPLMKTROZZZ7VZPCAXQZQU4A3OVRGWTN77UJGE4H`
+- **Frontend Live Demo:** `[YOUR_VERCEL_LINK_HERE]`
 
 ## Prerequisites
 
 - Node.js v18+
-- [Freighter Wallet](https://freighter.app/) extension installed in your browser and set to **Testnet**.
-- Testnet XLM to fund transactions and place bids (you can get this from the Freighter UI or Stellar laboratory).
+- [Freighter Wallet](https://freighter.app/) extension (set to **Testnet**)
+- Testnet XLM to fund transactions and place bids
 
 ## Local Development (Frontend)
 
@@ -39,5 +39,5 @@ A fully decentralized "no-loss" (English style) auction built on the Stellar net
 ## Architecture & Tech Stack
 
 - **Smart Contract:** Rust (Soroban SDK)
-- **Frontend UI:** React + TypeScript (Vite), Tailwind CSS v4, Glassmorphism UI
+- **Frontend UI:** React + TypeScript (Vite), Tailwind CSS
 - **Stellar Integration:** `@stellar/stellar-sdk`, `@stellar/freighter-api`
