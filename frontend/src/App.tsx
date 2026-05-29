@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import * as StellarSdk from '@stellar/stellar-sdk';
 import {
+  isConnected,
   isAllowed,
   setAllowed,
+  requestAccess,
   getAddress,
   getNetworkDetails,
 } from '@stellar/freighter-api';
@@ -15,6 +17,16 @@ interface AuctionState {
   deadline: number;
   token: string;
   auctioneer: string;
+}
+
+/** Helper: wrap a promise with a timeout so it never hangs forever */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms / 1000}s`)), ms),
+    ),
+  ]);
 }
 
 function App() {
@@ -43,13 +55,28 @@ function App() {
   // ── Wallet ──
   const checkConnection = useCallback(async () => {
     try {
-      if (await isAllowed()) {
-        const addrResult = await getAddress();
-        if (addrResult && addrResult.address) setWalletAddress(addrResult.address);
-        const nd = await getNetworkDetails();
-        if (nd && nd.network) setNetwork(nd.network);
+      // First check if Freighter extension is installed
+      const connResult = await withTimeout(isConnected(), 5000, 'isConnected');
+      if (!connResult || !connResult.isConnected) return;
+
+      // Check if dapp is already allowed (returns { isAllowed: boolean }, NOT boolean)
+      const allowedResult = await withTimeout(isAllowed(), 5000, 'isAllowed');
+      if (!allowedResult || !allowedResult.isAllowed) return;
+
+      // Get address
+      const addrResult = await withTimeout(getAddress(), 5000, 'getAddress');
+      if (addrResult && !addrResult.error && addrResult.address) {
+        setWalletAddress(addrResult.address);
       }
-    } catch { /* Freighter not installed */ }
+
+      // Get network details
+      const nd = await withTimeout(getNetworkDetails(), 5000, 'getNetworkDetails');
+      if (nd && !nd.error && nd.network) {
+        setNetwork(nd.network);
+      }
+    } catch (e) {
+      console.warn('Freighter check failed (extension may not be installed):', e);
+    }
   }, []);
 
   useEffect(() => { checkConnection(); }, [checkConnection]);
@@ -57,8 +84,51 @@ function App() {
   const connectWallet = async () => {
     setConnectLoading(true);
     try {
-      await setAllowed();
-      await checkConnection();
+      // Step 1: Check if Freighter is even installed
+      const connResult = await withTimeout(isConnected(), 5000, 'isConnected');
+      if (!connResult || !connResult.isConnected) {
+        showStatus('Freighter extension not detected. Please install it from https://freighter.app', 'error');
+        setConnectLoading(false);
+        return;
+      }
+
+      // Step 2: Try requestAccess first (simpler flow — directly returns address)
+      try {
+        const accessResult = await withTimeout(requestAccess(), 30000, 'requestAccess');
+        if (accessResult && !accessResult.error && accessResult.address) {
+          setWalletAddress(accessResult.address);
+          // Get network details
+          try {
+            const nd = await withTimeout(getNetworkDetails(), 5000, 'getNetworkDetails');
+            if (nd && !nd.error && nd.network) setNetwork(nd.network);
+          } catch { /* non-critical */ }
+          showStatus('Wallet connected!', 'success');
+          setConnectLoading(false);
+          return;
+        }
+        // If requestAccess returned an error, fall through to setAllowed
+        if (accessResult?.error) {
+          console.warn('requestAccess returned error:', accessResult.error);
+        }
+      } catch (e) {
+        console.warn('requestAccess failed, trying setAllowed:', e);
+      }
+
+      // Step 3: Fallback — use setAllowed + getAddress
+      const allowResult = await withTimeout(setAllowed(), 30000, 'setAllowed');
+      if (allowResult && allowResult.isAllowed) {
+        const addrResult = await withTimeout(getAddress(), 5000, 'getAddress');
+        if (addrResult && !addrResult.error && addrResult.address) {
+          setWalletAddress(addrResult.address);
+        }
+        try {
+          const nd = await withTimeout(getNetworkDetails(), 5000, 'getNetworkDetails');
+          if (nd && !nd.error && nd.network) setNetwork(nd.network);
+        } catch { /* non-critical */ }
+        showStatus('Wallet connected!', 'success');
+      } else {
+        showStatus('Connection was denied or timed out. Please approve in Freighter.', 'error');
+      }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       showStatus(`Failed to connect: ${msg}`, 'error');
@@ -267,11 +337,11 @@ function App() {
       {/* Animated background blobs */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full opacity-30"
-             style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%)', animation: 'float 8s ease-in-out infinite' }} />
+          style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%)', animation: 'float 8s ease-in-out infinite' }} />
         <div className="absolute top-[20%] right-[-5%] w-[400px] h-[400px] rounded-full opacity-30"
-             style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)', animation: 'float 10s ease-in-out infinite reverse' }} />
+          style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)', animation: 'float 10s ease-in-out infinite reverse' }} />
         <div className="absolute bottom-[-10%] left-[30%] w-[600px] h-[600px] rounded-full opacity-20"
-             style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.4) 0%, transparent 70%)', animation: 'float 12s ease-in-out infinite' }} />
+          style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.4) 0%, transparent 70%)', animation: 'float 12s ease-in-out infinite' }} />
       </div>
 
       {/* Loading overlay */}
